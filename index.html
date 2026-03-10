@@ -59,146 +59,152 @@ Coefficient applied on bond stress (γT) <input id="gammaT" Value="1.80">
 </div>
 <script>
 
+// Helper to log steps to the UI
+let logText = "";
+function log(name, value, unit = "") {
+    logText += `${name}: ${value.toLocaleString(undefined, {maximumFractionDigits: 3})} ${unit} <br>`;
+}
+  
 function rad(x){return x*Math.PI/180;}
 
 function calculate() {
 logText = "<h3>CALCULATION LOG</h3>";
 try {
-// ================= INPUTS =================
-function rad(x){return x * Math.PI / 180;}
-let beta = rad(parseFloat(document.getElementById("beta").value));
-let s = parseFloat(document.getElementById("s").value);
-let gamma = parseFloat(document.getElementById("gamma").value);
-let alpha = rad(parseFloat(document.getElementById("alpha").value);
-let JCSo = parseFloat(document.getElementById("JCSo").value);
-let JRCo = parseFloat(document.getElementById("JRCo").value);
-let Ch = parseFloat(document.getElementById("Ch").value);
-let Cv = parseFloat(document.getElementById("Cv").value);
-let E = parseFloat(document.getElementById("E").value);
-let omega = rad(parseFloat(document.getElementById("omega").value));
+    // ================= INPUTS =================
+    function rad(x){return x * Math.PI / 180;}
+    let beta = rad(parseFloat(document.getElementById("beta").value));
+    let s = parseFloat(document.getElementById("s").value);
+    let gamma = parseFloat(document.getElementById("gamma").value);
+    let alpha = rad(parseFloat(document.getElementById("alpha").value));
+    let JCSo = parseFloat(document.getElementById("JCSo").value);
+    let JRCo = parseFloat(document.getElementById("JRCo").value);
+    let Ch = parseFloat(document.getElementById("Ch").value);
+    let Cv = parseFloat(document.getElementById("Cv").value);
+    let E = parseFloat(document.getElementById("E").value);
+    let omega = rad(parseFloat(document.getElementById("omega").value));
+    
+    let ix = parseFloat(document.getElementById("ix").value);
+    let iy = parseFloat(document.getElementById("iy").value);
+    let epsilon = rad(parseFloat(document.getElementById("epsilon").value));
+    let alphaB = parseFloat(document.getElementById("alphaB").value);
+    
+    let phie = parseFloat(document.getElementById("phie").value);
+    let phii = parseFloat(document.getElementById("phii").value);
+    let phidrill = parseFloat(document.getElementById("phidrill").value);
+    
+    let tc = parseFloat(document.getElementById("tc").value);
+    let fytensile = parseFloat(document.getElementById("fytensile").value);
+    let gammaA = parseFloat(document.getElementById("gammaA").value);
+    let gammaT = parseFloat(document.getElementById("gammaT").value);
+    
+    let taulim = parseFloat(document.getElementById("taulim").value);
+    let Lp = parseFloat(document.getElementById("Lp").value);
+    
+    let M0 = parseFloat(document.getElementById("M0").value);
+    let Mmesh = parseFloat(document.getElementById("Mmesh").value);
+    
+    let gammaR = parseFloat(document.getElementById("gammaR").value);
+    let gammaD = parseFloat(document.getElementById("gammaD").value);
+    let gammamesh = parseFloat(document.getElementById("gammamesh").value);
+      
+    // =================Resistance / Stabilizing contribution of the Anchors =================
+    
+    let effectiveArea = (Math.PI/4) * (Math.pow((phie - 2*tc),2) - Math.pow(phii,2)); // mm2
+    let Ne = effectiveArea * fytensile; // N
+    let theta0 = rad(90) - beta - epsilon; // Degree
+    let sigmaN = s * gamma * Math.cos(alpha); // kN/m2
+    let Ln = iy; // m
+    let Lo = 0.1; // m
+    let JRCn = JRCo * Math.pow((Ln/Lo),(-0.02 * JRCo));
+    let JCSn = JCSo * Math.pow((Ln/Lo),(-0.03 * JCSo)); // MPa
+    let delta = (1/3) * JRCn * Math.log10(JCSn / sigmaN);
+    let mm = 1 / Math.tan(theta0 + delta);
+    let Fyk = Math.sqrt((1 + Math.pow(mm,2)/16) / (1 + Math.pow(mm,2)/4)) * Ne; // N
+    let Fyd = (Fyk / gammaA)/1000; // kN
+    let TBar = (fytensile * effectiveArea) / (gammaA * 1000) ; // kN
+    
+    // ================= WEIGHT OF UNSTABLE MASS =================
+    
+    // W = iX * iY * s * γ
+    let W = ix * iy * s * gamma * 1000; // N
+    
+    // ================= DRIVING FORCES =================
+    let WT = W * Math.sin(beta)* gammaD; // N
+    let WHT = W * Ch * Math.cos(beta);  // N
+    let WVT = W * Cv * Math.sin(beta);  // N
+    let ET = E * Math.cos(rad(90) - omega)* gammaD * 1000; // N
+    let EHT = E * Ch * Math.cos(beta) * 1000;  // N
+    let EVT = E * Cv * Math.sin(beta) * 1000;  // N
+    
+    let tauD = (WT + WHT + WVT + ET + EHT + EVT)/1000; // kN
+    
+    // ================= RESISTING FORCES =================
+    let phi = 45; 
+    let WN = W * Math.sin(beta) * gammaR;// N
+    let WHN = W * Ch * Math.sin(beta)*Math.tan(phi);// N
+    let WVN = W * Cv * Math.cos(beta)*Math.tan(phi);// N
+    let EN = -E * Math.sin(rad(90) - omega) * Math.tan(phi) / gammaR;// N
+    let EHN = E*Ch*Math.sin(beta)*Math.tan(phi);// N
+    let EVN = E*Cv*Math.cos(beta)*Math.tan(phi);// N
+    
+    let tauS = (WN + EVN - EN - EHN - WHN)/1000; // kN
+    
+    // The Stabilizing force required for the equilibrium becomes Rstabd
+    let Rstab = tauD - tauS;
+    
+    let FOS_Slope = (Fyd + tauS)/tauD;
+    let FOS_anchor = Fyd/Rstab;
+    let AnchorWorkingRate = (Rstab/Fyd)*100; // %
+    
 
-let ix = parseFloat(document.getElementById("ix").value);
-let iy = parseFloat(document.getElementById("iy").value);
-let epsilon = rad(parseFloat(document.getElementById("epsilon").value));
-let alphaB = parseFloat(document.getElementById("alphaB").value);
+    
+    // =================MESH DESIGN =================
+    
+    // To check the shape of block that can move among the anchors ( Triangular / Trapezoid) _ if ; ATAN( s / (s*tan(θo ) + iy) ) > (β  - α), Triangular otherwise Trapezoid
+    let lhs = Math.atan(s / (s * Math.tan(theta0) + iy));
+    let rhs = beta - alpha;
+    let shape, b, h;
+        if (lhs > rhs) {shape = "Triangular"; b = 0; h = (iy * Math.sin(beta - alpha) / Math.sin(Math.PI - beta - epsilon)) / 1.0955;} 
+        else {shape = "Trapezoidal";    b = iy - (s / Math.tan(beta - alpha)) + s * Math.tan(theta0); h = s;}
+    
+    // Sliding Block weight
+    let Bk = gamma * ix * h * ((iy + b) / 2); //kN
+     
+    // ================= BLOCK DRIVING FORCES =================
+    let BT = Bk*Math.sin(alpha) / gammaD;
+    let BHT = Bk*Ch*Math.cos(alpha);
+    let BVT = Bk*Cv*Math.sin(alpha);
+    
+    let BD = BT + BHT + BVT; // kN
+      
+    // ================= BLOCK RESISTING FORCES =================
+    let BN = Bk*Math.sin(alpha)/gammaR;
+    let BHN = Bk*Ch*Math.sin(alpha)*Math.tan(phi);
+    let BVN = Bk*Cv*Math.cos(alpha)*Math.tan(phi);
+    
+    let BR = BN + BHN + BVN; // kN
+    // The design force developed by the block moving among the anchor, Fd
+    let Fd = BD - BR; // kN
+    
+    // Punch force acting on the Mesh Design value, Md
+    let Md = Fd*Math.sin((beta-alpha)); //kN
+    let Mdv = Fd*Math.cos(beta-alpha); //kN
+    let P2 = Md * Math.cos(theta0) + Mdv*Math.sin(theta0); // N
+    let MeshDesign = Mmesh/gammamesh; //kN
+    let FOS_Mesh = (MeshDesign/Md);
+    ${MeshWorkingRate.toFixed(1)} %
 
-let phie = parseFloat(document.getElementById("phie").value);
-let phii = parseFloat(document.getElementById("phii").value);
-let phidrill = parseFloat(document.getElementById("phidrill").value);
-
-let tc = parseFloat(document.getElementById("tc").value);
-let fytensile = parseFloat(document.getElementById("fytensile").value);
-let gammaA = parseFloat(document.getElementById("gammaA").value);
-let gammaT = parseFloat(document.getElementById("gammaT").value);
-
-let taulim = parseFloat(document.getElementById("taulim").value);
-let Lp = parseFloat(document.getElementById("Lp").value);
-
-let M0 = parseFloat(document.getElementById("M0").value);
-let Mmesh = parseFloat(document.getElementById("Mmesh").value);
-
-let gammaR = parseFloat(document.getElementById("gammaR").value);
-let gammaD = parseFloat(document.getElementById("gammaD").value);
-let gammamesh = parseFloat(document.getElementById("gammamesh").value);
-  
-// =================Resistance / Stabilizing contribution of the Anchors =================
-
-let effectiveArea = (Math.PI/4) * (Math.pow((phie - 2*tc),2) - Math.pow(phii,2)); // m2
-let Ne = effectiveArea * fytensile; // N
-let theta0 = rad(90) - beta - epsilon; // Degree
-let sigmaN = s * gamma * Math.cos(alpha); // kN/m2
-let Ln = iy; // m
-let Lo = 0.1; // m
-let JRCn = JRCo * Math.pow((Ln/Lo),(-0.02 * JRCo));
-let JCSn = JCSo * Math.pow((Ln/Lo),(-0.03 * JCSo)); // MPa
-let delta = (1/3) * JRCn * Math.log10(JCSn / sigmaN);
-let mm = 1 / Math.tan(theta0 + delta);
-let Fyk = Math.sqrt((1 + Math.pow(mm,2)/16) / (1 + Math.pow(mm,2)/4)) * Ne; // N
-let Fyd = (Fyk / gammaA)/1000; // kN
-let TBar = (fytensile * effectiveArea) / (gammaA * 1000) ; // kN
-
-// ================= WEIGHT OF UNSTABLE MASS =================
-
-// W = iX * iY * s * γ
-let W = iX * iY * s * gamma; // N
-
-// ================= DRIVING FORCES =================
-let WT = W * Math.sin(beta)* gammaD; // N
-let WHT = W * Ch * Math.cos(beta);  // N
-let WVT = W * Cv * Math.sin(beta);  // N
-let ET = E * Math.cos(rad(90) - omega)* gammaD * 1000; // N
-let EHT = E * Ch * Math.cos(beta) * 1000;  // N
-let EVT = E * Cv * Math.sin(beta) * 1000;  // N
-
-let tauD = (WT + WHT + WVT + ET + EHT + EVT)/1000; // kN
-
-// ================= RESISTING FORCES =================
-let phi = 45; 
-let WN = W * Math.sin(beta) * gammaR;// N
-let WHN = W * Ch * Math.sin(beta)*Math.tan(phi);// N
-let WVN = W * Cv * Math.cos(beta)*Math.tan(phi);// N
-let EN = -E * Math.sin(rad(90) - omega) * Math.tan(Φ) / GammaR;// N
-let EHN = E*Ch*Math.sin(β)*Math.tan(Φ);// N
-let EVN = E*Cv*Math.cos(β)*Math.tan(Φ);// N
-
-let tauS = (WN + EVN - EN - EHN - WHN)/1000; // kN
-
-// The Stabilizing force required for the equilibrium becomes Rstabd
-let Rstab = tauD - tauS;
-
-let FOS_Slope = (Fyd + tauS)/tauD;
-let FOS_anchor = Fyd/Rstab;
-let AnchorWorkingRate = (Rstab/Fyd)*100; // %
-
-// =================Nail Length Evaluation =================
-  
-// mim theortical length of the anchor (Lt)
-let Lt = Ls + Li + Lp; // m
-let Li = (s * gammaD)/math.cos(theta0); // m
-let P1 = Rstab * math.cos(rad(90)-theta0); // N
-let P2 = Md * math.cos(theta0) + Mdv*math.sin(theta0); // N
-let P = Math.max(P1,P2); // N
-let Ls = ((P* gammaT)/(math.PI * phidrill *taulim))/1000 // m
-let Lt_final = Math.round((Math.ceil(Lt*100)/100) / 0.5) * 0.5; // m
-
-// =================MESH DESIGN =================
-
-// To check the shape of block that can move among the anchors ( Triangular / Trapezoid) _ if ; ATAN( s / (s*tan(θo ) + iy) ) > (β  - α), Triangular otherwise Trapezoid
-let lhs = Math.atan(s / (s * Math.tan(theta0) + iy));
-let rhs = beta - alpha;
-let shape, b, h;
-    if (lhs > rhs) {shape = "Triangular"; b = 0; h = (iy * Math.sin(beta - alpha) / Math.sin(Math.PI - beta - epsilon)) / 1.0955;} 
-    else {shape = "Trapezoidal";    b = iy - (s / Math.tan(beta - alpha)) + s * Math.tan(theta0); h = s;}
-
-// Sliding Block weight
-let Bk = gamma * ix * h * ((iy + b) / 2); //kN
- 
-// ================= BLOCK DRIVING FORCES =================
-let BT = Bk*Math.sin(alpha) / gammaD;
-let BHT = Bk*Ch*Math.cos(alpha);
-let BVT = Bk*Cv*Math.sin(alpha);
-
-let BD = BT + BHT + BVT; // kN
-  
-// ================= BLOCK RESISTING FORCES =================
-let BN = Bk*Math.sin(alpha)/gammaR;
-let BHN = Bk*Ch*Math.sin(alpha)*Math.tan(phi);
-let BVN = Bk*Cv*Math.cos(alpha)*Math.tan(phi);
-
-let BR = BN + BHN + BVN; // kN
-// The design force developed by the block moving among the anchor, Fd
-let Fd = BD - BR; // kN
-
-// Punch force acting on the Mesh Design value, Md
-let Md = Fd*Math.sin((beta-alpha)); //kN
-let Mdv = Fd*math.cos((beta-alpha); //kN
-let Meshdesign = Mmesh/gammamesh; //kN
-
-//Factor of Resistance for punching of the mesh, FOSR_Defl
-let FOS_Mesh = Meshdesign/Md;
-let MeshWorkingRate = (Md/Meshdesign)*100; // %
-
-// ================= OUTPUT =================
+    // =================Nail Length Evaluation =================
+      
+    // mim theortical length of the anchor (Lt)
+    let Li = (s * gammaD)/Math.cos(theta0); // m
+    let P1 = Rstab * Math.cos(rad(90)-theta0); // N
+    let P = Math.max(P1,P2); // N
+    let Ls = ((P* gammaT)/(Math.PI * phidrill *taulim))/1000 // m
+    let Lt = Ls + Li + Lp; // m
+    let Lt_final = Math.round((Math.ceil(Lt*100)/100) / 0.5) * 0.5; // m
+    
+    // ================= OUTPUT =================
 
   // --- FINAL OUTPUT ---
         document.getElementById("output").innerHTML = `
