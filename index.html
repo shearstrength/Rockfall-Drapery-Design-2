@@ -100,7 +100,7 @@ let gammaR = parseFloat(document.getElementById("gammaR").value);
 let gammaD = parseFloat(document.getElementById("gammaD").value);
 let gammamesh = parseFloat(document.getElementById("gammamesh").value);
   
-// ================= A) Resistance / Stabilizing contribution of the Anchors =================
+// =================Resistance / Stabilizing contribution of the Anchors =================
 
 let effectiveArea = (Math.PI/4) * (Math.pow((phie - 2*tc),2) - Math.pow(phii,2)); // m2
 let Ne = effectiveArea * fyk; // N
@@ -149,7 +149,7 @@ let FOS_Slope = (Fyd + tauS)/tauD;
 let FOS_anchor = Fyd/Rstab;
 let AnchorWorkingRate = (Rstab/Fyd)*100; // %
 
-// ================= B) Nail Length Evaluation =================
+// =================Nail Length Evaluation =================
   
 // mim theortical length of the anchor (Lt)
 let Lt = Ls + Li + Lp; // m
@@ -160,7 +160,7 @@ let P = Math.max(P1,P2); // N
 let Ls = ((P* gammaT)/(math.PI * phidrill *taulim))/1000 // m
 let Lt_final = Math.round((Math.ceil(Lt*100)/100) / 0.5) * 0.5; // m
 
-// ================= C) MESH DESIGN =================
+// =================MESH DESIGN =================
 
 // To check the shape of block that can move among the anchors ( Triangular / Trapezoid) _ if ; ATAN( s / (s*tan(θo ) + iy) ) > (β  - α), Triangular otherwise Trapezoid
 let lhs = Math.atan(s / (s * Math.tan(theta0) + iy));
