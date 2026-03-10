@@ -54,16 +54,14 @@ Coefficient applied on the tensile and the punch resistance (γmesh) <input id="
 Coefficient applied on yield stress of bar (γA) <input id="gammaA" Value="1.15">
 Coefficient applied on bond stress (γT) <input id="gammaT" Value="1.80">
 
-<button onclick="calculate()">Calculate</button>
-<div class="results" id="output"></div>
-</div>
-<script>
+    <button onclick="calculate()">Calculate Design </button>
+    <div class="results" id="output"></div>
+    </div>
+    <script>
 
 // Helper to log steps to the UI
 let logText = "";
-function log(name, value, unit = "") {
-    logText += `${name}: ${value.toLocaleString(undefined, {maximumFractionDigits: 3})} ${unit} <br>`;
-}
+logText = "<h3>CALCULATION LOG</h3>";
   
 function rad(x){return x*Math.PI/180;}
 
@@ -190,9 +188,9 @@ try {
     let Md = Fd*Math.sin((beta-alpha)); //kN
     let Mdv = Fd*Math.cos(beta-alpha); //kN
     let P2 = Md * Math.cos(theta0) + Mdv*Math.sin(theta0); // N
-    let MeshDesign = Mmesh/gammamesh; //kN
-    let FOS_Mesh = (MeshDesign/Md);
-    ${MeshWorkingRate.toFixed(1)} %
+    let MeshDesign = Mmesh / gammamesh; // kN
+    let FOS_Mesh = MeshDesign / Md;
+    let MeshWorkingRate = (Md / MeshDesign) * 100;
 
     // =================Nail Length Evaluation =================
       
@@ -200,23 +198,35 @@ try {
     let Li = (s * gammaD)/Math.cos(theta0); // m
     let P1 = Rstab * Math.cos(rad(90)-theta0); // N
     let P = Math.max(P1,P2); // N
-    let Ls = ((P* gammaT)/(Math.PI * phidrill *taulim))/1000 // m
+    let Ls = ((P* gammaT)/(Math.PI * phidrill *taulim))/1000; // m
     let Lt = Ls + Li + Lp; // m
     let Lt_final = Math.round((Math.ceil(Lt*100)/100) / 0.5) * 0.5; // m
     
     // ================= OUTPUT =================
 
-  // --- FINAL OUTPUT ---
-        document.getElementById("output").innerHTML = `
-            <div class="results">${logText}</div>
-            <br><h3>FINAL RESULTS</h3>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr><td><b>1) Anchor FOS (Slope):</b></td><td>${FOS_Slope.toFixed(2)}</td></tr>
-                <tr><td><b>2) Anchor Working Rate:</b></td><td>${AnchorWorkingRate.toFixed(1)} %</td></tr>
-                <tr><td><b>3) Mesh FOS:</b></td><td>${FOS_Mesh.toFixed(2)}</td></tr>
-                <tr><td><b>4) Mesh Working Rate:</b></td><td>${((Md/MeshCapacity)*100).toFixed(1)} %</td></tr>
-            </table>
-        `;
+    // --- FINAL OUTPUT ---
+    document.getElementById("output").innerHTML = `
+        <div class="results">${logText}</div>
+        <br><h3>FINAL RESULTS</h3>
+        <table style="width:100%; border-collapse: collapse;">
+            <tr>
+                <td><b>1) Anchor FOS (Slope):</b></td>
+                <td>${FOS_Slope.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td><b>2) Anchor Working Rate:</b></td>
+                <td>${AnchorWorkingRate.toFixed(1)} %</td>
+            </tr>
+            <tr>
+                <td><b>3) Mesh FOS:</b></td>
+                <td>${FOS_Mesh.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td><b>4) Mesh Working Rate:</b></td>
+                <td>${MeshWorkingRate.toFixed(1)} %</td>
+            </tr>
+        </table>
+    `;
     } catch (err) {
         console.error(err);
         document.getElementById("output").innerHTML = `<span style='color:red'>Error: ${err.message}</span>`;
