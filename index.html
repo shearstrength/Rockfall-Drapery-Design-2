@@ -69,7 +69,7 @@ function calculate() {
 logText = "<h3>CALCULATION LOG</h3>";
 try {
     // ================= INPUTS =================
-    function rad(x){return x * Math.PI / 180;}
+    
     let beta = rad(parseFloat(document.getElementById("beta").value));
     let s = parseFloat(document.getElementById("s").value);
     let gamma = parseFloat(document.getElementById("gamma").value);
@@ -124,7 +124,9 @@ try {
     // ================= WEIGHT OF UNSTABLE MASS =================
     
     // W = iX * iY * s * γ
-    let W = ix * iy * s * gamma * 1000; // N
+    let W = ix * iy * s * gamma * 1000; // N 
+    log("Weight of unstable rock", W, "mm²");
+    
     
     // ================= DRIVING FORCES =================
     let WT = W * Math.sin(beta)* gammaD; // N
@@ -135,6 +137,7 @@ try {
     let EVT = E * Cv * Math.sin(beta) * 1000;  // N
     
     let tauD = (WT + WHT + WVT + ET + EHT + EVT)/1000; // kN
+    log("Toal Driving force", tauD, "kN");
     
     // ================= RESISTING FORCES =================
     let phi = 45; 
@@ -146,10 +149,11 @@ try {
     let EVN = E*Cv*Math.cos(beta)*Math.tan(phi);// N
     
     let tauS = (WN + EVN - EN - EHN - WHN)/1000; // kN
+    log("Toal Resisting force", tauS, "kN");
     
     // The Stabilizing force required for the equilibrium becomes Rstabd
     let Rstab = tauD - tauS;
-    
+    log("Toal Stablizing force", Rstab, "kN");
     let FOS_Slope = (Fyd + tauS)/tauD;
     let FOS_anchor = Fyd/Rstab;
     let AnchorWorkingRate = (Rstab/Fyd)*100; // %
