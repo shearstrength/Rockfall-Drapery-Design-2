@@ -147,8 +147,11 @@ try {
     // ================= RESISTING FORCES =================
     let phi = 45; 
     let WN = W * Math.sin(beta) * gammaR;// N
+    log("WN", WN, "kN");
     let WHN = W * Ch * Math.sin(beta)*Math.tan(phi);// N
+    log("WHN", WHN, "kN");
     let WVN = W * Cv * Math.cos(beta)*Math.tan(phi);// N
+    log("WVN", WVN, "kN");
     let EN = -E * Math.sin(rad(90) - omega) * Math.tan(phi) / gammaR;// N
     let EHN = E*Ch*Math.sin(beta)*Math.tan(phi);// N
     let EVN = E*Cv*Math.cos(beta)*Math.tan(phi);// N
