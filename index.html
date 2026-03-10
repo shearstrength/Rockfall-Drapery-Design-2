@@ -166,9 +166,8 @@ let Lt_final = Math.round((Math.ceil(Lt*100)/100) / 0.5) * 0.5; // m
 let lhs = Math.atan(s / (s * Math.tan(theta0) + iy));
 let rhs = beta - alpha;
 let shape, b, h;
-
-if (lhs > rhs) {shape = "Triangular"; b = 0; h = (iy * Math.sin(beta - alpha) / Math.sin(Math.PI - beta - epsilon)) / 1.0955;} 
-else {shape = "Trapezoidal";    b = iy - (s / Math.tan(beta - alpha)) + s * Math.tan(theta0); h = s;}
+    if (lhs > rhs) {shape = "Triangular"; b = 0; h = (iy * Math.sin(beta - alpha) / Math.sin(Math.PI - beta - epsilon)) / 1.0955;} 
+    else {shape = "Trapezoidal";    b = iy - (s / Math.tan(beta - alpha)) + s * Math.tan(theta0); h = s;}
 
 // Sliding Block weight
 let Bk = gamma * ix * h * ((iy + b) / 2); //kN
@@ -200,15 +199,18 @@ let MeshWorkingRate = (Md/Meshdesign)*100; // %
 
 // ================= OUTPUT =================
 
-  document.getElementById("output").innerHTML =
-"<h3>RESULTS</h3>" +
-"1) Anchor FOS (Slope) = <b>" + FOS_slope.toFixed(2) + "</b><br>" +
-"2) Anchor Working Rate = <b>" + AnchorWorkingRate.toFixed(1) + " %</b><br>" +
-"3) Mesh FOS = <b>" + FOS_Mesh.toFixed(2) + "</b><br>" +
-"4) Mesh Working Rate = <b>" + MeshWorkingRate.toFixed(1) + " %</b>";
-
-}
-
+  // --- FINAL OUTPUT ---
+        document.getElementById("output").innerHTML = `
+            <div class="results">${logText}</div>
+            <br><h3>FINAL RESULTS</h3>
+            <table style="width:100%; border-collapse: collapse;">
+                <tr><td><b>1) Anchor FOS (Slope):</b></td><td>${FOS_Slope.toFixed(2)}</td></tr>
+                <tr><td><b>2) Anchor Working Rate:</b></td><td>${AnchorWorkingRate.toFixed(1)} %</td></tr>
+                <tr><td><b>3) Mesh FOS:</b></td><td>${FOS_Mesh.toFixed(2)}</td></tr>
+                <tr><td><b>4) Mesh Working Rate:</b></td><td>${((Md/MeshCapacity)*100).toFixed(1)} %</td></tr>
+            </table>
+        `;
+    } 
 </script>
 </body>
 </html>
