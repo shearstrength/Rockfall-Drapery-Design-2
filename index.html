@@ -61,6 +61,11 @@ Coefficient applied on bond stress (γT) <input id="gammaT" Value="1.80">
 
 // Helper to log steps to the UI
 let logText = "";
+
+function log(name, value, unit = "") {
+    logText += name + " : " + Number(value).toFixed(3) + " " + unit + "<br>";
+}
+
 logText = "<h3>CALCULATION LOG</h3>";
   
 function rad(x){return x*Math.PI/180;}
