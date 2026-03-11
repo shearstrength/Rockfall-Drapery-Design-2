@@ -145,7 +145,7 @@ try {
     log("Toal Driving force", tauD, "kN");
     
     // ================= RESISTING FORCES =================
-    let phi = 45; 
+    let phi = rad(45); 
     let WN = (W * Math.sin(beta) )/ gammaR;// N
     log("WN", WN, "kN");
     let WHN = W * Ch * Math.sin(beta)*Math.tan(45);// N
