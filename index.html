@@ -69,7 +69,8 @@ function log(name, value, unit = "") {
 logText = "<h3>CALCULATION LOG</h3>";
   
 function rad(x){return x*Math.PI/180;}
-
+function deg(x){return x*180/Math.PI;}
+        
 function calculate() {
 logText = "<h3>CALCULATION LOG</h3>";
 try {
@@ -115,7 +116,7 @@ try {
     let effectiveArea = (Math.PI/4) * (Math.pow((phie - 2*tc),2) - Math.pow(phii,2)); // mm²
     log("Effective area of the bar", effectiveArea, "mm²");
     let Ne = effectiveArea * fytensile; // N
-    let theta0 = 90 - beta - epsilon; // Degree
+    let theta0 = 90 - deg(beta) - deg(epsilon); // Degree
     log("Theta0", theta0, "Degree");
     let sigmaN = s * gamma * Math.cos(alpha); // kN/m2
     let Ln = iy; // m
@@ -124,6 +125,7 @@ try {
     let JCSn = JCSo * Math.pow((Ln/Lo),(-0.03 * JCSo)); // MPa
     let delta = (1/3) * JRCn * Math.log10(JCSn / sigmaN);
     let mm = 1 / Math.tan(theta0 + delta);
+    log("m Value", mm, " ");
     let Fyk = Math.sqrt((1 + Math.pow(mm,2)/16) / (1 + Math.pow(mm,2)/4)) * Ne; // N
     log("Stabilization resistance of the anchor bar", Fyk, "kN");
     let Fyd = (Fyk / gammaA)/1000; // kN
