@@ -115,7 +115,7 @@ try {
     let effectiveArea = (Math.PI/4) * (Math.pow((phie - 2*tc),2) - Math.pow(phii,2)); // mm²
     log("Effective area of the bar", effectiveArea, "mm²");
     let Ne = effectiveArea * fytensile; // N
-    let theta0 = rad(90) - beta - epsilon; // Degree
+    let theta0 = 90 - beta - epsilon; // Degree
     log("Theta0", theta0, "Degree");
     let sigmaN = s * gamma * Math.cos(alpha); // kN/m2
     let Ln = iy; // m
