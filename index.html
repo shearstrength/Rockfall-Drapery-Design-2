@@ -207,7 +207,7 @@ try {
     
     // Punch force acting on the Mesh Design value, Md
     let Md = Fd*Math.sin((beta-alpha)); //kN
-    log("Punch Force for mesh design value Md", MeshDesign, "kN");
+    log("Punch Force for mesh design value Md", Md, "kN");
     let Mdv = Fd*Math.cos(beta-alpha); //kN
     let P2 = Md * Math.cos(theta0) + Mdv*Math.sin(theta0); // N
     let MeshDesign = Mmesh / gammamesh; // kN
