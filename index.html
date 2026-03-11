@@ -124,6 +124,7 @@ try {
     let JRCn = JRCo * Math.pow((Ln/Lo),(-0.02 * JRCo));
     let JCSn = JCSo * Math.pow((Ln/Lo),(-0.03 * JCSo)); // MPa
     let delta = (1/3) * JRCn * Math.log10(JCSn / sigmaN);
+    log("delta Value", delta, " ");
     let mm = 1 / Math.tan(theta0 + delta);
     log("m Value", mm, " ");
     let Fyk = Math.sqrt((1 + Math.pow(mm,2)/16) / (1 + Math.pow(mm,2)/4)) * Ne; // N
