@@ -173,8 +173,6 @@ try {
     let FOS_anchor = Fyd/Rstab;
     let AnchorWorkingRate = (Rstab/Fyd)*100; // %
     
-
-    
     // =================MESH DESIGN =================
     
     // To check the shape of block that can move among the anchors ( Triangular / Trapezoid) _ if ; ATAN( s / (s*tan(θo ) + iy) ) > (β  - α), Triangular otherwise Trapezoid
@@ -183,9 +181,12 @@ try {
     let shape, b, h;
         if (lhs > rhs) {shape = "Triangular"; b = 0; h = (iy * Math.sin(beta - alpha) / Math.sin(Math.PI - beta - epsilon)) / 1.0955;} 
         else {shape = "Trapezoidal";    b = iy - (s / Math.tan(beta - alpha)) + s * Math.tan(theta0); h = s;}
-    
+    log("shape of block", shape, " ");
+    log("b value", b, "m");
+    log("h value", h, "m");
     // Sliding Block weight
     let Bk = gamma * ix * h * ((iy + b) / 2); //kN
+    log("Block weight over the mesh", Bk, "kN");
      
     // ================= BLOCK DRIVING FORCES =================
     let BT = Bk*Math.sin(alpha) / gammaD;
