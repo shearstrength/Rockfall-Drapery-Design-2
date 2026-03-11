@@ -189,28 +189,32 @@ try {
     log("Block weight over the mesh", Bk, "kN");
      
     // ================= BLOCK DRIVING FORCES =================
-    let BT = Bk*Math.sin(alpha) / gammaD;
+    let BT = Bk*Math.sin(alpha) * gammaD;
     let BHT = Bk*Ch*Math.cos(alpha);
     let BVT = Bk*Cv*Math.sin(alpha);
-    
     let BD = BT + BHT + BVT; // kN
-      
+    log("Driving Forces over the mesh", BD, "kN");
+    
     // ================= BLOCK RESISTING FORCES =================
     let BN = Bk*Math.sin(alpha)/gammaR;
     let BHN = Bk*Ch*Math.sin(alpha)*Math.tan(phi);
     let BVN = Bk*Cv*Math.cos(alpha)*Math.tan(phi);
+    let BR = BN; // kN
+    log("Resisting Forces over the mesh", BR, "kN");
     
-    let BR = BN + BHN + BVN; // kN
     // The design force developed by the block moving among the anchor, Fd
     let Fd = BD - BR; // kN
     
     // Punch force acting on the Mesh Design value, Md
     let Md = Fd*Math.sin((beta-alpha)); //kN
+    log("Punch Force for mesh design value Md", MeshDesign, "kN");
     let Mdv = Fd*Math.cos(beta-alpha); //kN
     let P2 = Md * Math.cos(theta0) + Mdv*Math.sin(theta0); // N
     let MeshDesign = Mmesh / gammamesh; // kN
+    log("Punch resistance for mesh design value Mmesh/Ymesh", MeshDesign, "kN");
     let FOS_Mesh = MeshDesign / Md;
     let MeshWorkingRate = (Md / MeshDesign) * 100;
+    
 
     // =================Nail Length Evaluation =================
       
